@@ -76,4 +76,3 @@ class Empresa_Atencedentes(models.Model):
     idEmpresa = models.ForeignKey(Empresa, null=True, on_delete=models.SET_NULL)
     info=models.CharField(null=False, max_length=1000)
     data_submisao=models.DateField(auto_now_add=True)
-

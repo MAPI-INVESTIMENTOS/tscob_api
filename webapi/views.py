@@ -32,7 +32,7 @@ from django.template.loader import render_to_string
 import os
 import string
 import random
-
+from portalsdk import APIContext, APIMethodType, APIRequest
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
     queryset = Empresa.objects.all()
@@ -64,7 +64,6 @@ class LoginAPI(KnoxLoginView):
 
 
 class Registar_Empresa(generics.CreateAPIView):
-    permission_classes = (permissions.AllowAny)
     queryset = Empresa.objects.all()
     serializer_class = RegisterSerializer
 
@@ -112,7 +111,8 @@ class Registar_Empresa(generics.CreateAPIView):
             Representante=info['nome'],
             cidade=info['cidade'],
         provinvia = info['provincia'],
-            user=user
+            user=user,
+
 
 
         )
@@ -197,7 +197,32 @@ class Marcar_Quitacao(generics.CreateAPIView):
     serializer_class = Empresa_Serializado
 
     def post(self, request, *args, **kwargs):
+        print("[][][][][][]")
+        print(self.request.data)
         print(self.request.user.id)
+        api_context = APIContext()
+        api_context.api_key = '8qvoqsy28owlb75lmq9pwmlnr8ctbsq9'
+        api_context.public_key = 'MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAmptSWqV7cGUUJJhUBxsMLonux24u+FoTlrb+4Kgc6092JIszmI1QUoMohaDDXSVueXx6IXwYGsjjWY32HGXj1iQhkALXfObJ4DqXn5h6E8y5/xQYNAyd5bpN5Z8r892B6toGzZQVB7qtebH4apDjmvTi5FGZVjVYxalyyQkj4uQbbRQjgCkubSi45Xl4CGtLqZztsKssWz3mcKncgTnq3DHGYYEYiKq0xIj100LGbnvNz20Sgqmw/cH+Bua4GJsWYLEqf/h/yiMgiBbxFxsnwZl0im5vXDlwKPw+QnO2fscDhxZFAwV06bgG0oEoWm9FnjMsfvwm0rUNYFlZ+TOtCEhmhtFp+Tsx9jPCuOd5h2emGdSKD8A6jtwhNa7oQ8RtLEEqwAn44orENa1ibOkxMiiiFpmmJkwgZPOG/zMCjXIrrhDWTDUOZaPx/lEQoInJoE2i43VN/HTGCCw8dKQAwg0jsEXau5ixD0GUothqvuX3B9taoeoFAIvUPEq35YulprMM7ThdKodSHvhnwKG82dCsodRwY428kg2xM/UjiTENog4B6zzZfPhMxFlOSFX4MnrqkAS+8Jamhy1GgoHkEMrsT5+/ofjCx0HjKbT5NuA2V/lmzgJLl3jIERadLzuTYnKGWxVJcGLkWXlEPYLbiaKzbJb2sYxt+Kt5OxQqC1MCAwEAAQ=='
+        api_context.ssl = True
+        api_context.method_type = APIMethodType.POST
+        api_context.address = 'api.sandbox.vm.co.mz'
+        api_context.port = 18352
+        api_context.path = '/ipg/v1x/c2bPayment/singleStage/'
+
+        api_context.add_header('Origin', '*')
+
+        api_context.add_parameter('input_TransactionReference', 'T12344C')
+        api_context.add_parameter('input_CustomerMSISDN', f"258{self.request.data['nrcelular']}")
+        api_context.add_parameter('input_Amount', '10')
+        api_context.add_parameter('input_ThirdPartyReference', '111PA2D')
+        api_context.add_parameter('input_ServiceProviderCode', '171717')
+
+        api_request = APIRequest(api_context)
+        result = api_request.execute()
+
+        print(result.status_code)
+        print(result.headers)
+        print(result.body)
         company = Empresa.objects.get(user=int(self.request.user.id))
         print(company)
         company_s_q = Pedidos_Quitacao.objects.create(idEmpresa=company,estado=1,user=User.objects.get(id=int(self.request.user.id)))
@@ -461,7 +486,7 @@ class Assinalar_Arquivo_Usurio(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         print(self.request.data)
         Assin=Pedidos_Quitacao.objects.get(idPedido=int(self.request.data['idPedido']))
-        Assin.user=User.objects.get(username='AntonioMarcos')
+        Assin.user=User.objects.get(username=self.request.data['idUsuario'])
         Assin.assinalado="1"
         Assin.assinalado_er="1"
         Assin.save()
@@ -496,3 +521,8 @@ class Nao_tem_nenhum(generics.CreateAPIView):
         emp.assinalado_er="3"
         emp.save()
         return Response({"df":"df"})
+class SearchArquivoUsers(generics.ListAPIView):
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(groups__name='arquivo')

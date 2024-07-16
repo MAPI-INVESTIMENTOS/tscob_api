@@ -24,5 +24,6 @@ urlpatterns = [
     path('web/Pesquisar_Antecedentes_Empresa/',Empresa_Antecentes_lista.as_view(),name="get quitacao"),
     path('web/Assinalar_Funcionario/',Assinalar_Arquivo_Usurio.as_view(),name="Assinar Funcionario Arquivo"),
     path('web/Arquivo_Gestao/',Gestao_do_Map_arquivo.as_view(),name="Aio Arquivo"),
-    path('web/Nao_tem_nenhum/',Nao_tem_nenhum.as_view(),name="sds")
+    path('web/Nao_tem_nenhum/',Nao_tem_nenhum.as_view(),name="sds"),
+    path('web/arquivo_users/',SearchArquivoUsers.as_view(),name='lista dos funcionarios do arquivo')
 ]

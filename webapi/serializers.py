@@ -6,6 +6,10 @@ class Empresa_Serializado(serializers.ModelSerializer):
     class Meta:
         model = Empresa
         fields = '__all__'
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
